@@ -1,5 +1,6 @@
 import Graph from './graph.js';
 import Vertex from './vertex.js';
+import Queue from './queue.js';
 
 function createKnightsBoard(size = 8) {
   const knightsBoard = new Graph();
@@ -31,3 +32,53 @@ function createKnightsBoard(size = 8) {
 
   return knightsBoard;
 }
+
+// format for source and destination => "i-j"
+function knightMoves(source, destination) {
+  const path = [];
+  const board = createKnightsBoard();
+  // board.logAdjacencyList();
+
+  const queue = new Queue();
+  const sourceVertex = board.getVertex(source);
+  sourceVertex.setDistance(0);
+  queue.enqueue(sourceVertex);
+
+  while (!queue.isEmpty()) {
+    const vertex = queue.dequeue();
+    if (vertex.vertexName === destination) break;
+    vertex.adjacentVertices.forEach((vertexName) => {
+      const currentVertex = board.getVertex(vertexName);
+      if (currentVertex.distanceFromSource !== null) return;
+      currentVertex.setPredecessor(vertex.vertexName);
+      currentVertex.setDistance(vertex.getDistance() + 1);
+      queue.enqueue(currentVertex);
+    });
+  }
+
+  function constructPathFrom(vertexName) {
+    const currentVertex = board.getVertex(vertexName);
+    path.unshift(currentVertex.vertexName);
+    if (currentVertex.getDistance() === 0) return;
+    constructPathFrom(currentVertex.predecessorVertex);
+  }
+
+  constructPathFrom(destination);
+
+  console.log(`start position: ${source}`);
+  console.log(`destination: ${destination}`);
+  console.log('========================');
+  console.log(`You made it in ${path.length - 1} moves! Here's your path:`);
+  path.forEach((pos) => console.log(pos));
+}
+
+knightMoves('2-1', '7-6');
+// start position: 2-1
+// destination: 7-6
+// ========================
+// You made it in 4 moves! Here's your path:
+// 2-1
+// 4-2
+// 6-3
+// 5-5
+// 7-6
